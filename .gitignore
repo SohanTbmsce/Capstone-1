@@ -1,6 +1,22 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Maven
 target/
+*.class
+
+# IntelliJ IDEA
 .idea/
 *.iml
+
+# Eclipse / Spring Tools
 .classpath
 .project
 .settings/
+
+# Logs
+*.log
+
+# Environment / secrets
+.env

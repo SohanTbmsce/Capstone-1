@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: jwt-auth-demo
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    com.hdfc.jwtauth: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"
+
+
+resilience4j:
+
+  ratelimiter:
+    instances:
+      loginRateLimiter:
+        limitForPeriod: 5
+        limitRefreshPeriod: 1m
+        timeoutDuration: 0s
+        registerHealthIndicator: true
+
+  circuitbreaker:
+
+    instances:
+      loginCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
