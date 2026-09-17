@@ -2,6 +2,7 @@ package com.hdfclife.smartauth.exception;
 
 import com.hdfclife.smartauth.dto.response.ErrorResponse;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,22 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(401, "Invalid username or password"));
     }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidToken(InvalidTokenException ex , HttpServletRequest request) {
+
+        logger.warn("Token authentication failed for the request : {} Path : {}", request.getMethod(), request.getRequestURI());
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid or expired token found");
+
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex , HttpServletRequest request) {
+
+        logger.warn("User not found : {} " , request.getRequestURI());
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+
+    }
+
     @ExceptionHandler(RateLimitExceededException.class)
     public ResponseEntity<ErrorResponse> handleRateLimitExceededException(RateLimitExceededException ex) {
         logger.warn("Rate limit exceeded: {}", ex.getMessage());
@@ -67,5 +84,10 @@ public class GlobalExceptionHandler {
         logger.error("Unexpected error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(500, "An unexpected error occurred"));
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message) {
+        return ResponseEntity.status(status)
+                .body(new ErrorResponse(status.value(), message));
     }
 }
